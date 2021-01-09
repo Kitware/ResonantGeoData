@@ -3,6 +3,7 @@ import io
 import json
 import os
 import tempfile
+import uuid
 import zipfile
 
 import PIL.Image
@@ -18,6 +19,7 @@ from django.contrib.gis.geos import (
 )
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import ContentFile
+from dkc.core.models import File
 from girder_utils.files import field_file_to_local_path
 import kwcoco
 import kwimage
@@ -207,7 +209,7 @@ def populate_image_entry(ife):
     if not isinstance(ife, ImageFile):
         ife = ImageFile.objects.get(id=ife)
 
-    with field_file_to_local_path(ife.file) as file_path:
+    with field_file_to_local_path(ife.file.blob) as file_path:
         logger.info(f'The image file path: {file_path}')
         image_query = ImageEntry.objects.filter(image_file=ife)
         if len(image_query) < 1:
@@ -238,7 +240,7 @@ def _extract_raster_meta(image_file_entry):
 
     """
     raster_meta = dict()
-    with image_file_entry.file.open() as file_obj:
+    with image_file_entry.file.blob.open() as file_obj:
         with rasterio.open(file_obj) as src:
             raster_meta['crs'] = src.crs.to_proj4()
             raster_meta['origin'] = [src.bounds.left, src.bounds.bottom]
@@ -277,7 +279,7 @@ def _extract_raster_outline_and_footprint(image_file_entry):
     This operates on the assumption that the image file is a valid raster.
 
     """
-    with field_file_to_local_path(image_file_entry.file) as file_path:
+    with field_file_to_local_path(image_file_entry.file.blob) as file_path:
         # Reproject the raster to the DB SRID using rasterio directly rather
         #  than transforming the extracted geometry which had issues.
         src = _reproject_raster(rasterio.open(file_path), DB_SRID)
@@ -457,8 +459,8 @@ def load_kwcoco_dataset(kwcoco_dataset_id):
     # Unarchive the images locally so we can import them when loading the spec
     # Images could come from a URL, so this is optional
     if ds_entry.image_archive:
-        with ds_entry.image_archive.file as file_obj:
-            logger.info(f'The KWCOCO image archive: {ds_entry.image_archive}')
+        with ds_entry.image_archive.blob as file_obj:
+            logger.info(f'The KWCOCO image archive: {ds_entry.image_archive.blob}')
             # Place images in a local directory and keep track of root path
             # Unzip the contents to the working dir
             with zipfile.ZipFile(file_obj, 'r') as zip_ref:
@@ -469,7 +471,7 @@ def load_kwcoco_dataset(kwcoco_dataset_id):
         # TODO: how should we download data from specified URLs?
 
     # Load the KWCOCO JSON spec and make annotations on the images
-    with field_file_to_local_path(ds_entry.spec_file.file) as file_path:
+    with field_file_to_local_path(ds_entry.spec_file.blob) as file_path:
         ds = kwcoco.CocoDataset(str(file_path))
         # Set the root dir to where the images were extracted / the temp dir
         # If images are coming from URL, they will download to here
@@ -485,7 +487,13 @@ def load_kwcoco_dataset(kwcoco_dataset_id):
             name = os.path.basename(image_file_abs_path)
             image_file = ImageFile()
             image_file.skip_task = True
-            image_file.file.save(name, open(image_file_abs_path, 'rb'))
+            file = File(
+                name=uuid.uuid4().hex,
+                creator=ds_entry.spec_file.creator,
+                folder=ds_entry.spec_file.folder,
+            )
+            file.blob.save(name, open(image_file_abs_path, 'rb'))
+            image_file.file = file
             # Create a new ImageEntry
             image_entry = populate_image_entry(image_file)
             # Add ImageEntry to ImageSet
