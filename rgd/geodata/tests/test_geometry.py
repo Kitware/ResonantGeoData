@@ -21,4 +21,4 @@ def test_geometry_etl(sample_file):
     # Testing that we can repopulate a geometry archive again
     read_geometry_archive(geom_archive.id)
     # test the field file validator
-    models.geometry.base.validate_archive(geom_archive.file.blob)
+    models.geometry.base.validate_archive(geom_archive.file)
