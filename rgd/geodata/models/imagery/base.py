@@ -3,7 +3,7 @@ from django.contrib.gis.db import models
 from django.contrib.postgres import fields
 from django.utils.html import escape, mark_safe
 from django.utils.translation import gettext_lazy as _
-from s3_file_field import S3FileField
+from dkc.core.models import File
 
 from rgd.utility import _link_url
 
@@ -26,7 +26,7 @@ class ImageFile(ChecksumFile, TaskEventMixin):
     task_func = tasks.task_read_image_file
     failure_reason = models.TextField(null=True)
     status = models.CharField(max_length=20, default=Status.CREATED, choices=Status.choices)
-    file = S3FileField()
+    file = models.OneToOneField(File, on_delete=models.CASCADE)
 
     def image_data_link(self):
         return _link_url('geodata', 'image_file', self, 'file')
@@ -273,13 +273,13 @@ class KWCOCOArchive(ModifiableEntry, TaskEventMixin):
     failure_reason = models.TextField(null=True)
     status = models.CharField(max_length=20, default=Status.CREATED, choices=Status.choices)
     spec_file = models.OneToOneField(
-        ArbitraryFile,
+        File,
         on_delete=models.CASCADE,
         related_name='kwcoco_spec_file',
         help_text='The JSON spec file.',
     )
     image_archive = models.OneToOneField(
-        ArbitraryFile,
+        File,
         null=True,
         on_delete=models.CASCADE,
         related_name='kwcoco_image_archive',

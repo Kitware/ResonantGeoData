@@ -1,7 +1,7 @@
 from django.contrib.gis.db import models
 from django.core.exceptions import ValidationError
+from dkc.core.models import File
 import magic
-from s3_file_field import S3FileField
 
 from rgd.utility import _link_url
 
@@ -15,7 +15,7 @@ def validate_archive(field_file):
     """Validate file is a zip or tar archive."""
     acceptable = ['application/zip', 'application/gzip']
 
-    mimetype = magic.from_buffer(field_file.read(16384), mime=True)
+    mimetype = magic.from_buffer(field_file.blob.read(16384), mime=True)
 
     if mimetype not in acceptable:
         raise ValidationError('Unsupported file archive.')
@@ -29,7 +29,9 @@ class GeometryArchive(ChecksumFile, TaskEventMixin):
     """
 
     task_func = tasks.task_read_geometry_archive
-    file = S3FileField(
+    file = models.OneToOneField(
+        File,
+        on_delete=models.CASCADE,
         validators=[validate_archive],
         help_text='This must be an archive (`.zip` or `.tar`) of a single shape (`.shp`, `.dbf`, `.shx`, etc.).',
     )
