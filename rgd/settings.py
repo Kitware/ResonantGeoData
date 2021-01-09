@@ -71,17 +71,18 @@ class RgdMixin(CrispyFormsMixin, GeoDjangoMixin, SwaggerMixin, ConfigMixin):
             if key in configuration.INSTALLED_APPS:
                 insert_index = min(insert_index, configuration.INSTALLED_APPS.index(key))
         configuration.INSTALLED_APPS.insert(insert_index, 'rgd.geodata.apps.GeodataConfig')
+        configuration.INSTALLED_APPS.insert(insert_index, 'dkc.core.apps.CoreConfig')
 
         configuration.INSTALLED_APPS += [
             's3_file_field',
+            'guardian',
             'django.contrib.humanize',
-            'rules.apps.AutodiscoverRulesConfig',  # TODO: need this?
             # To ensure that exceptions inside other apps' signal handlers do not affect the
             # integrity of file deletions within transactions, CleanupConfig should be last.
             'django_cleanup.apps.CleanupConfig',
         ]
 
-        configuration.AUTHENTICATION_BACKENDS.insert(0, 'rules.permissions.ObjectPermissionBackend')
+        configuration.AUTHENTICATION_BACKENDS.insert(0, 'guardian.backends.ObjectPermissionBackend')
 
     # This cannot have a default value, since the password and database name are always
     # set by the service admin

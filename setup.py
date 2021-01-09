@@ -67,6 +67,8 @@ setup(
         # GeoData
         'GDAL',
         'numpy',
+        # dkc
+        'dkc@git+https://github.com/girder/dkc-next.git@30de9278573a95c3cec86b9c01cd184d111c4055#egg=dkc-0.1.0',
     ],
     extras_require={
         'dev': ['ipython', 'tox'],
