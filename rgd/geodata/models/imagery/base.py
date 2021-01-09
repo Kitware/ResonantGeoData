@@ -3,12 +3,13 @@ from django.contrib.gis.db import models
 from django.contrib.postgres import fields
 from django.utils.html import escape, mark_safe
 from django.utils.translation import gettext_lazy as _
+from model_utils.models import TimeStampedModel
 from s3_file_field import S3FileField
 
 from rgd.utility import _link_url
 
 from ... import tasks
-from ..common import ArbitraryFile, ChecksumFile, ModifiableEntry, SpatialEntry
+from ..common import ArbitraryFile, ChecksumFile, SpatialEntry
 from ..mixins import Status, TaskEventMixin
 
 
@@ -34,7 +35,7 @@ class ImageFile(ChecksumFile, TaskEventMixin):
     image_data_link.allow_tags = True
 
 
-class ImageEntry(ModifiableEntry):
+class ImageEntry(TimeStampedModel):
     """Single image entry, tracks the original file."""
 
     def __str__(self):
@@ -64,7 +65,7 @@ class ImageEntry(ModifiableEntry):
         return self.thumbnail.icon_tag()
 
 
-class Thumbnail(ModifiableEntry):
+class Thumbnail(TimeStampedModel):
     """Thumbnail model and utility for ImageEntry."""
 
     image_entry = models.OneToOneField(ImageEntry, on_delete=models.CASCADE)
@@ -88,7 +89,7 @@ class Thumbnail(ModifiableEntry):
     icon_tag.allow_tags = True
 
 
-class ImageSet(ModifiableEntry):
+class ImageSet(TimeStampedModel):
     """Container for many images."""
 
     def __str__(self):
@@ -122,7 +123,7 @@ class ImageSet(ModifiableEntry):
         return annots
 
 
-class RasterEntry(ModifiableEntry, TaskEventMixin):
+class RasterEntry(TimeStampedModel, TaskEventMixin):
     """This class is a container for the metadata of a raster.
 
     This model inherits from ``ImageSet`` and only adds an extra layer of
@@ -167,7 +168,7 @@ class RasterEntry(ModifiableEntry, TaskEventMixin):
         return self.image_set.images.first().thumbnail.icon_tag()
 
 
-class RasterMetaEntry(ModifiableEntry, SpatialEntry):
+class RasterMetaEntry(TimeStampedModel, SpatialEntry):
 
     parent_raster = models.OneToOneField(RasterEntry, on_delete=models.CASCADE)
 
@@ -180,7 +181,7 @@ class RasterMetaEntry(ModifiableEntry, SpatialEntry):
     transform = fields.ArrayField(models.FloatField(), size=6)
 
 
-class BandMetaEntry(ModifiableEntry):
+class BandMetaEntry(TimeStampedModel):
     """A basic container to keep track of useful band info."""
 
     parent_image = models.ForeignKey(ImageEntry, on_delete=models.CASCADE)
@@ -199,7 +200,7 @@ class BandMetaEntry(ModifiableEntry):
     interpretation = models.TextField()
 
 
-class ConvertedImageFile(ModifiableEntry, TaskEventMixin):
+class ConvertedImageFile(TimeStampedModel, TaskEventMixin):
     """A model to store converted versions of a raster entry."""
 
     task_func = tasks.task_convert_to_cog
@@ -209,7 +210,7 @@ class ConvertedImageFile(ModifiableEntry, TaskEventMixin):
     source_image = models.OneToOneField(ImageEntry, on_delete=models.CASCADE)
 
 
-class SubsampledImage(ModifiableEntry, TaskEventMixin):
+class SubsampledImage(TimeStampedModel, TaskEventMixin):
     """A subsample of an ImageEntry."""
 
     task_func = tasks.task_populate_subsampled_image
@@ -259,7 +260,7 @@ class SubsampledImage(ModifiableEntry, TaskEventMixin):
             raise ValueError('Sample type ({}) unknown.'.format(self.sample_type))
 
 
-class KWCOCOArchive(ModifiableEntry, TaskEventMixin):
+class KWCOCOArchive(TimeStampedModel, TaskEventMixin):
     """A container for holding imported KWCOCO datasets.
 
     User must upload a JSON file of the KWCOCO meta info and an optional

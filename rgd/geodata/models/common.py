@@ -4,33 +4,12 @@ import os
 from django.contrib.gis.db import models
 from django.utils import timezone
 from model_utils.managers import InheritanceManager
+from model_utils.models import TimeStampedModel
 from s3_file_field import S3FileField
 
 from rgd.utility import compute_checksum
 
 from .constants import DB_SRID
-
-
-class ModifiableEntry(models.Model):
-    """A base class for models that need to track modified datetimes and users."""
-
-    modified = models.DateTimeField(editable=False, help_text='The last time this entry was saved.')
-    created = models.DateTimeField(editable=False, help_text='When this was added to the database.')
-    # creator = models.ForeignKey(
-    #     get_user_model(), on_delete=models.DO_NOTHING, related_name='creator'
-    # )
-    # modifier = models.ForeignKey(
-    #     get_user_model(), on_delete=models.DO_NOTHING, related_name='modifier'
-    # )
-
-    def save(self, *args, **kwargs):
-        if not self.id:
-            self.created = timezone.now()
-        self.modified = timezone.now()
-        if 'update_fields' in kwargs:
-            kwargs = kwargs.copy()
-            kwargs['update_fields'] = set(kwargs['update_fields']) | {'modified'}
-        super(ModifiableEntry, self).save(*args, **kwargs)
 
 
 class SpatialEntry(models.Model):
@@ -55,7 +34,7 @@ class SpatialEntry(models.Model):
         return 'Spatial ID: {} (type: {})'.format(self.spatial_id, type(self))
 
 
-class ChecksumFile(ModifiableEntry):
+class ChecksumFile(TimeStampedModel):
     """A base class for tracking files.
 
     Child class must implement a file field called ``file``! This ensures the
