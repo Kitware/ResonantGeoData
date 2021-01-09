@@ -17,7 +17,7 @@
         {% for entry in entries %}
           <tr>
             <td><a href="{% url 'fmv-entry-detail' entry.pk %}">{{ entry.name }} ({{ entry.id }})</a></td>
-            <td>{{ entry.fmv_file.file.size|filesizeformat }}</td>
+            <td>{{ entry.fmv_file.file.blob.size|filesizeformat }}</td>
           </tr>
         {% endfor %}
       </tbody>
