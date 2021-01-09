@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from dkc.core.tests.factories import FileFactory
 import factory
 import factory.django
 
@@ -19,8 +20,8 @@ class ImageFileFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.ImageFile
 
-    name = factory.Faker('sentence', nb_words=2)
-    file = factory.django.FileField(filename='sample.dat')
+    name = factory.Faker('sentence')
+    file = factory.SubFactory(FileFactory)
     # creator = factory.SubFactory(UserFactory)
     # modifier = factory.SubFactory(UserFactory)
 
@@ -29,7 +30,7 @@ class ImageSetFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.ImageSet
 
-    name = factory.Faker('sentence', nb_words=2)
+    name = factory.Faker('sentence')
 
     @factory.post_generation
     def images(self, create, extracted, **kwargs):
@@ -44,7 +45,7 @@ class RasterEntryFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.RasterEntry
 
-    name = factory.Faker('sentence', nb_words=2)
+    name = factory.Faker('sentence')
     image_set = factory.SubFactory(ImageSetFactory)
 
     # If we have an on_commit or post_save method that modifies the model, we
@@ -59,8 +60,8 @@ class GeometryArchiveFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.GeometryArchive
 
-    name = factory.Faker('sentence', nb_words=2)
-    file = factory.django.FileField(filename='sample.dat')
+    name = factory.Faker('sentence')
+    file = factory.SubFactory(FileFactory)
 
 
 class ArbitraryFileFactory(factory.django.DjangoModelFactory):
@@ -81,9 +82,9 @@ class KWCOCOArchiveFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.KWCOCOArchive
 
-    name = factory.Faker('sentence', nb_words=2)
-    spec_file = factory.SubFactory(ArbitraryFileFactory)
-    image_archive = factory.SubFactory(ArbitraryFileFactory)
+    name = factory.Faker('sentence')
+    spec_file = factory.SubFactory(FileFactory)
+    image_archive = factory.SubFactory(FileFactory)
 
     # If we have an on_commit or post_save method that modifies the model, we
     # need to refresh it afterwards.
@@ -97,8 +98,8 @@ class FMVFileFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.FMVFile
 
-    name = factory.Faker('sentence', nb_words=2)
-    file = factory.django.FileField(filename='sample.mpeg')
+    name = factory.Faker('sentence')
+    file = factory.SubFactory(FileFactory)
     klv_file = factory.django.FileField(filename='sample.klv')
     web_video_file = factory.django.FileField(filename='sample.mp4')
     frame_rate = 30

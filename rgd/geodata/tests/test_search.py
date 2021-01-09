@@ -21,8 +21,7 @@ SampleFiles = [
 def _load_sample_files():
     for testfile in SampleFiles:
         imagefile = factories.ImageFileFactory(
-            file__filename=testfile['name'],
-            file__from_path=datastore.fetch(testfile['name']),
+            file__blob__from_path=datastore.fetch(testfile['name']),
         )
         image_set = factories.ImageSetFactory(
             images=[imagefile.imageentry.id],

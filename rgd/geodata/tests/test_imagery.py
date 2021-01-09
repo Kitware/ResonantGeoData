@@ -30,8 +30,7 @@ LandsatFiles = [
 @pytest.mark.django_db(transaction=True)
 def test_imagefile_to_rasterentry_centroids(testfile):
     imagefile = factories.ImageFileFactory(
-        file__filename=testfile['name'],
-        file__from_path=datastore.fetch(testfile['name']),
+        file__blob__from_path=datastore.fetch(testfile['name']),
     )
     image_set = factories.ImageSetFactory(
         images=[imagefile.imageentry.id],
@@ -51,8 +50,7 @@ def test_repopulate_image_entry():
     """Only test with single image file."""
     testfile = SampleFiles[0]
     imagefile = factories.ImageFileFactory(
-        file__filename=testfile['name'],
-        file__from_path=datastore.fetch(testfile['name']),
+        file__blob__from_path=datastore.fetch(testfile['name']),
     )
     # Testing that we can repopulate an image entry
     populate_image_entry(imagefile.id)
@@ -62,16 +60,13 @@ def test_repopulate_image_entry():
 def test_multi_file_raster():
     """Test the use case where a raster is generated from multiple files."""
     b1 = factories.ImageFileFactory(
-        file__filename=LandsatFiles[0],
-        file__from_path=datastore.fetch(LandsatFiles[0]),
+        file__blob__from_path=datastore.fetch(LandsatFiles[0]),
     )
     b2 = factories.ImageFileFactory(
-        file__filename=LandsatFiles[1],
-        file__from_path=datastore.fetch(LandsatFiles[1]),
+        file__blob__from_path=datastore.fetch(LandsatFiles[1]),
     )
     b3 = factories.ImageFileFactory(
-        file__filename=LandsatFiles[2],
-        file__from_path=datastore.fetch(LandsatFiles[2]),
+        file__blob__from_path=datastore.fetch(LandsatFiles[2]),
     )
     image_set = factories.ImageSetFactory(
         images=[
@@ -95,10 +90,8 @@ def _run_kwcoco_import(demo):
     f_spec_file = demo['spec']
 
     kwds = factories.KWCOCOArchiveFactory(
-        image_archive__file__filename=f_image_archive,
-        image_archive__file__from_path=datastore.fetch(f_image_archive),
-        spec_file__file__filename=f_spec_file,
-        spec_file__file__from_path=datastore.fetch(f_spec_file),
+        image_archive__file__blob__from_path=datastore.fetch(f_image_archive),
+        spec_file__file__blob__from_path=datastore.fetch(f_spec_file),
     )
     return kwds
 
@@ -151,8 +144,7 @@ def test_kwcoco_rle_demo():
 @pytest.mark.django_db(transaction=True)
 def test_cog_image_conversion():
     image_file = factories.ImageFileFactory(
-        file__filename=SampleFiles[0]['name'],
-        file__from_path=datastore.fetch(SampleFiles[0]['name']),
+        file__blob__from_path=datastore.fetch(SampleFiles[0]['name']),
     )
     img = ImageEntry.objects.get(image_file=image_file)
     c = ConvertedImageFile()
@@ -167,8 +159,7 @@ def test_cog_image_conversion():
 def test_subsampling():
     name = 'Elevation.tif'
     image_file = factories.ImageFileFactory(
-        file__filename=name,
-        file__from_path=datastore.fetch(name),
+        file__blob__from_path=datastore.fetch(name),
     )
 
     def create_subsampled(img, sample_type, params):

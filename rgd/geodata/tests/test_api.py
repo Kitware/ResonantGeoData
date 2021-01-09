@@ -17,8 +17,7 @@ def arbitrary_file():
 def landsat_image():
     name = 'LC08_L1TP_034032_20200429_20200509_01_T1_sr_band1.tif'
     imagefile = factories.ImageFileFactory(
-        file__filename=name,
-        file__from_path=datastore.fetch(name),
+        file__blob__from_path=datastore.fetch(name),
     )
     return imagefile.imageentry
 
@@ -27,8 +26,7 @@ def landsat_image():
 def astro_image():
     name = 'astro.png'
     imagefile = factories.ImageFileFactory(
-        file__filename=name,
-        file__from_path=datastore.fetch(name),
+        file__blob__from_path=datastore.fetch(name),
     )
     return imagefile.imageentry
 
@@ -37,8 +35,7 @@ def astro_image():
 def landsat_raster():
     name = 'LC08_L1TP_034032_20200429_20200509_01_T1_sr_band1.tif'
     imagefile = factories.ImageFileFactory(
-        file__filename=name,
-        file__from_path=datastore.fetch(name),
+        file__blob__from_path=datastore.fetch(name),
     )
     image_set = factories.ImageSetFactory(
         images=[imagefile.imageentry.id],
