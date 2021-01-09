@@ -56,7 +56,7 @@ def convert_to_cog(cog):
     else:
         cog.refresh_from_db()
     cog.converted_file = ArbitraryFile()
-    src = cog.source_image.image_file.imagefile.file
+    src = cog.source_image.image_file.imagefile.file.blob
     output = cog.converted_file.file
     _gdal_translate_fields(src, output, prefix='cog_', options=COG_OPTIONS)
     cog.converted_file.save()

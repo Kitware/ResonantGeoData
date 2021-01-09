@@ -42,7 +42,7 @@ def read_geometry_archive(archive_id):
     workdir = getattr(settings, 'GEODATA_WORKDIR', None)
     tmpdir = tempfile.mkdtemp(dir=workdir)
 
-    with archive.file.open() as archive_file_obj:
+    with archive.file.blob.open() as archive_file_obj:
         logger.info(f'The geometry archive: {archive.file}')
 
         # Unzip the contents to the working dir

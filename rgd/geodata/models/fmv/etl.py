@@ -19,7 +19,7 @@ logger = get_task_logger(__name__)
 def _extract_klv_with_docker(fmv_file_entry):
     logger.info('Entered `_extract_klv_with_docker`')
     image_name = 'banesullivan/kwiver:dump-klv'
-    video_file = fmv_file_entry.file
+    video_file = fmv_file_entry.file.blob
     try:
         client = docker.from_env(version='auto', timeout=3600)
         _ = client.images.pull(image_name)
@@ -165,7 +165,7 @@ def _get_frame_rate_of_video(file_path):
 
 
 def _convert_video_to_mp4(fmv_file_entry):
-    video_file = fmv_file_entry.file
+    video_file = fmv_file_entry.file.blob
     with field_file_to_local_path(video_file) as dataset_path:
         logger.info('Converting video file: %s' % (dataset_path))
         tmpdir = tempfile.mkdtemp()
