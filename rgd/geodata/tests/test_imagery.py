@@ -90,8 +90,8 @@ def _run_kwcoco_import(demo):
     f_spec_file = demo['spec']
 
     kwds = factories.KWCOCOArchiveFactory(
-        image_archive__file__blob__from_path=datastore.fetch(f_image_archive),
-        spec_file__file__blob__from_path=datastore.fetch(f_spec_file),
+        image_archive__blob__from_path=datastore.fetch(f_image_archive),
+        spec_file__blob__from_path=datastore.fetch(f_spec_file),
     )
     return kwds
 
