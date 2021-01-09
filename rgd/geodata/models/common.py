@@ -3,8 +3,10 @@ import os
 # from django.contrib.auth import get_user_model
 from django.contrib.gis.db import models
 from django.utils import timezone
+from dkc.core.models import File
 from model_utils.managers import InheritanceManager
 from s3_file_field import S3FileField
+from s3_file_field.fields import S3FieldFile
 
 from rgd.utility import compute_checksum
 
@@ -75,7 +77,12 @@ class ChecksumFile(ModifiableEntry):
         abstract = True
 
     def update_checksum(self):
-        self.checksum = compute_checksum(self.file)
+        if isinstance(self.file, S3FieldFile):
+            self.checksum = compute_checksum(self.file)
+        elif isinstance(self.file, File):
+            self.checksum = compute_checksum(self.file.blob)
+        else:
+            raise ValueError('Expected `file` to either be DKC data or an S3FieldFile.')
         # Simple update save - not full save
         super(ChecksumFile, self).save(
             update_fields=[
