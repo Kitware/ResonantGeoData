@@ -57,7 +57,7 @@ def download_arbitrary_file(request, pk):
 @api_view(['GET'])
 def download_image_entry_file(request, pk):
     instance = models.imagery.ImageEntry.objects.get(pk=pk)
-    url = instance.image_file.imagefile.file.url
+    url = instance.image_file.imagefile.file.blob.url
     return HttpResponseRedirect(url)
 
 
