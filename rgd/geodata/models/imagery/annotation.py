@@ -4,13 +4,13 @@ import pickle
 
 from django.contrib.gis.db import models
 from django.core.exceptions import ObjectDoesNotExist
-from model_utils.models import TimeStampedModel
 import numpy as np
 
+from ..common import ModifiableEntry
 from .base import ImageEntry
 
 
-class Annotation(TimeStampedModel):
+class Annotation(ModifiableEntry):
     """Image annotation/label for ``ImageEntry``."""
 
     image = models.ForeignKey(ImageEntry, on_delete=models.CASCADE)

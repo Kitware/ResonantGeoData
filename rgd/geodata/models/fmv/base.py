@@ -2,13 +2,12 @@ import base64
 import pickle
 
 from django.contrib.gis.db import models
-from model_utils.models import TimeStampedModel
 from s3_file_field import S3FileField
 
 from rgd.utility import _link_url
 
 from ... import tasks
-from ..common import ChecksumFile, SpatialEntry
+from ..common import ChecksumFile, ModifiableEntry, SpatialEntry
 from ..constants import DB_SRID
 from ..mixins import Status, TaskEventMixin
 
@@ -37,7 +36,7 @@ class FMVFile(ChecksumFile, TaskEventMixin):
     klv_data_link.allow_tags = True
 
 
-class FMVEntry(TimeStampedModel, SpatialEntry):
+class FMVEntry(ModifiableEntry, SpatialEntry):
     """Single FMV entry, tracks the original file."""
 
     def __str__(self):

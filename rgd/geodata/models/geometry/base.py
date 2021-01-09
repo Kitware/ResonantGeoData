@@ -1,13 +1,12 @@
 from django.contrib.gis.db import models
 from django.core.exceptions import ValidationError
 import magic
-from model_utils.models import TimeStampedModel
 from s3_file_field import S3FileField
 
 from rgd.utility import _link_url
 
 from ... import tasks
-from ..common import ChecksumFile, SpatialEntry
+from ..common import ChecksumFile, ModifiableEntry, SpatialEntry
 from ..constants import DB_SRID
 from ..mixins import Status, TaskEventMixin
 
@@ -47,7 +46,7 @@ class GeometryArchive(ChecksumFile, TaskEventMixin):
     archive_data_link.allow_tags = True
 
 
-class GeometryEntry(TimeStampedModel, SpatialEntry):
+class GeometryEntry(ModifiableEntry, SpatialEntry):
     """A holder for geometry vector data."""
 
     name = models.CharField(max_length=100, blank=True)
