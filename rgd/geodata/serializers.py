@@ -1,5 +1,7 @@
 import json
 
+from pyproj import CRS
+import pystac
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
@@ -210,6 +212,38 @@ class FMVEntryDataSerializer(FMVEntrySerializer):
     class Meta:
         model = models.FMVEntry
         fields = '__all__'
+
+
+class STACRasterSerializer(serializers.BaseSerializer):
+    def to_representation(self, instance: models.RasterMetaEntry) -> dict:
+        item = pystac.Item(
+            id=instance.pk,
+            geometry=json.loads(instance.footprint.json),
+            bbox=instance.extent,
+            datetime=(instance.acquisition_date or instance.modified or instance.created),
+            properties={},
+        )
+        # Add assets
+        for image_entry in instance.parent_raster.image_set.images.all():
+            asset = pystac.Asset(
+                href=image_entry.image_file.file.get_url(),
+                title=image_entry.image_file.file.name,
+            )
+            item.add_asset(f'image-{image_entry.pk}', asset)
+        for ancillary_file in instance.parent_raster.ancillary_files.all():
+            asset = pystac.Asset(
+                href=ancillary_file.get_url(),
+                title=ancillary_file.name,
+            )
+            item.add_asset(f'ancillary-{ancillary_file.pk}', asset)
+        # 'proj' extension
+        item.ext.enable('projection')
+
+        item.ext.projection.apply(
+            epsg=CRS.from_proj4(instance.crs).to_epsg(),
+            transform=instance.transform,
+        )
+        return item.to_dict()
 
 
 utility.make_serializers(globals(), models)
