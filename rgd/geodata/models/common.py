@@ -242,7 +242,7 @@ class ChecksumFile(ModifiableEntry, TaskEventMixin):
             is being utilized by GDAL and FUSE is not set up.
 
         """
-        if self.type == FileSourceType.URL and precheck_fuse(self.get_url()):
+        if precheck_fuse(self.get_url(internal=True)):
             return url_file_to_fuse_path(self.get_url(internal=True))
         elif vsi:
             logger.info('`yield_local_path` falling back to Virtual File System URL.')
