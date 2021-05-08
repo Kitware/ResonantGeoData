@@ -63,7 +63,7 @@ setup(
         'django-composed-configuration[prod]>=0.16',
         'django-s3-file-field[minio]',
         'flower',
-        'gunicorn',
+        'gunicorn[gthread]',
     ],
     extras_require={
         'dev': [
