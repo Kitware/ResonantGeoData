@@ -60,6 +60,7 @@ class RgdMixin(CrispyFormsMixin, GeoDjangoMixin, SwaggerMixin, ConfigMixin):
         # Install local apps first, to ensure any overridden resources are found first
         configuration.INSTALLED_APPS = [
             'rgd.geodata.apps.GeodataConfig',
+            'rgd.stac.apps.STACConfig',
         ] + configuration.INSTALLED_APPS
 
         # Install additional apps
