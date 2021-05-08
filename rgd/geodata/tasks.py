@@ -32,7 +32,7 @@ def _run_with_failure_reason(model, func, *args, **kwargs):
     model.save(update_fields=['failure_reason', 'status'])
 
 
-@shared_task(time_limit=86400)
+@shared_task(time_limit=86400, queue='priority')
 def task_read_image_file(file_id):
     from .models.imagery.base import ImageFile
     from .models.imagery.etl import read_image_file
@@ -49,7 +49,7 @@ def task_read_geometry_archive(archive_id):
     _run_with_failure_reason(archive, read_geometry_archive, archive_id)
 
 
-@shared_task(time_limit=86400)
+@shared_task(time_limit=86400, queue='priority')
 def task_populate_raster_entry(raster_id):
     from .models.imagery.base import RasterEntry
     from .models.imagery.etl import populate_raster_entry
